@@ -3,7 +3,8 @@
 
 #include "../../include/Graph/UndirectedGraph.hpp"
 
-#include <stdexcept>
+#include <expected>
+#include <string>
 
 template <typename V, typename W>
 UndirectedGraph<V, W>::UndirectedGraph()
@@ -98,9 +99,9 @@ bool UndirectedGraph<V, W>::is_directed() const {
 }
 
 template <typename V, typename W>
-std::size_t UndirectedGraph<V, W>::get_degree(const V& vertex) const {
+std::expected<std::size_t, std::string> UndirectedGraph<V, W>::get_degree(const V& vertex) const {
     if (!this->contains_vertex(vertex)) {
-        throw std::invalid_argument("Вершина не найдена в графе");
+        return std::unexpected("Вершина не найдена в графе");
     }
     return static_cast<std::size_t>(this->adjacency.get(vertex).get_length());
 }
@@ -156,7 +157,9 @@ template <typename V, typename W>
 bool UndirectedGraph<V, W>::is_connected() const {
     if (this->get_vertex_count() <= 1) return true;
     const mutable_array_sequence<V>& vertices = this->get_vertices();
-    return this->dfs(vertices[0]).get_length() == static_cast<int>(this->get_vertex_count());
+    std::expected<mutable_array_sequence<V>, std::string> dfs_res = this->dfs(vertices[0]);
+    if (!dfs_res) return false;
+    return dfs_res->get_length() == static_cast<int>(this->get_vertex_count());
 }
 
 template <typename V, typename W>

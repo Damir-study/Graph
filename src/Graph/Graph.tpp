@@ -5,7 +5,8 @@
 #include "../../TreeStructures/include/Dictionary/BinaryTreeDictionaryStorage.hpp"
 #include "../../TreeStructures/include/BinaryTree/BalancedTree.hpp"
 
-#include <stdexcept>
+#include <expected>
+#include <string>
 #include <utility>
 
 template <typename V, typename W>
@@ -111,12 +112,12 @@ bool Graph<V, W>::contains_edge(const V& from, const V& to) const {
 }
 
 template <typename V, typename W>
-const W& Graph<V, W>::get_edge_weight(const V& from, const V& to) const {
+std::expected<W, std::string> Graph<V, W>::get_edge_weight(const V& from, const V& to) const {
     if (!contains_vertex(from)) {
-        throw std::invalid_argument("Исходная вершина не найдена в графе");
+        return std::unexpected("Исходная вершина не найдена в графе");
     }
     if (!contains_vertex(to)) {
-        throw std::invalid_argument("Целевая вершина не найдена в графе");
+        return std::unexpected("Целевая вершина не найдена в графе");
     }
 
     const NeighborList& neighbors = adjacency.get(from);
@@ -126,7 +127,7 @@ const W& Graph<V, W>::get_edge_weight(const V& from, const V& to) const {
         }
     }
 
-    throw std::invalid_argument("Ребро между указанными вершинами отсутствует");
+    return std::unexpected("Ребро между указанными вершинами отсутствует");
 }
 
 template <typename V, typename W>
@@ -135,9 +136,9 @@ const mutable_array_sequence<V>& Graph<V, W>::get_vertices() const {
 }
 
 template <typename V, typename W>
-const typename Graph<V, W>::NeighborList& Graph<V, W>::get_neighbors(const V& vertex) const {
+std::expected<typename Graph<V, W>::NeighborList, std::string> Graph<V, W>::get_neighbors(const V& vertex) const {
     if (!contains_vertex(vertex)) {
-        throw std::invalid_argument("Вершина не найдена в графе");
+        return std::unexpected("Вершина не найдена в графе");
     }
     return adjacency.get(vertex);
 }
@@ -173,9 +174,9 @@ void Graph<V, W>::clear() {
 }
 
 template <typename V, typename W>
-mutable_array_sequence<V> Graph<V, W>::dfs(const V& start) const {
+std::expected<mutable_array_sequence<V>, std::string> Graph<V, W>::dfs(const V& start) const {
     if (!contains_vertex(start)) {
-        throw std::invalid_argument("Стартовая вершина не найдена в графе");
+        return std::unexpected("Стартовая вершина не найдена в графе");
     }
 
     mutable_array_sequence<V> result;
@@ -197,7 +198,8 @@ mutable_array_sequence<V> Graph<V, W>::dfs(const V& start) const {
         result.append(current);
 
         const NeighborList& neighbors = adjacency.get(current);
-        for (int i = 0; i < neighbors.get_length(); ++i) {
+        // Добавляем в стек в обратном порядке, чтобы первый сосед исследовался первым
+        for (int i = neighbors.get_length() - 1; i >= 0; --i) {
             const V& next = neighbors[i].vertex;
             if (!visited.contains_key(next)) {
                 stack.append(next);
@@ -209,9 +211,9 @@ mutable_array_sequence<V> Graph<V, W>::dfs(const V& start) const {
 }
 
 template <typename V, typename W>
-mutable_array_sequence<V> Graph<V, W>::bfs(const V& start) const {
+std::expected<mutable_array_sequence<V>, std::string> Graph<V, W>::bfs(const V& start) const {
     if (!contains_vertex(start)) {
-        throw std::invalid_argument("Стартовая вершина не найдена в графе");
+        return std::unexpected("Стартовая вершина не найдена в графе");
     }
 
     mutable_array_sequence<V> result;
@@ -275,10 +277,15 @@ bool Graph<V, W>::has_path(const V& from, const V& to) const {
 }
 
 template <typename V, typename W>
-mutable_array_sequence<V> Graph<V, W>::find_path(const V& from, const V& to) const {
-    mutable_array_sequence<V> path;
-    if (!contains_vertex(from) || !contains_vertex(to)) return path;
+std::expected<mutable_array_sequence<V>, std::string> Graph<V, W>::find_path(const V& from, const V& to) const {
+    if (!contains_vertex(from)) {
+        return std::unexpected("Исходная вершина не найдена в графе");
+    }
+    if (!contains_vertex(to)) {
+        return std::unexpected("Целевая вершина не найдена в графе");
+    }
 
+    mutable_array_sequence<V> path;
     if (from == to) {
         path.append(from);
         return path;
@@ -315,7 +322,9 @@ mutable_array_sequence<V> Graph<V, W>::find_path(const V& from, const V& to) con
         }
     }
 
-    if (!found) return path;
+    if (!found) {
+        return std::unexpected("Путь между указанными вершинами отсутствует");
+    }
 
     mutable_array_sequence<V> reverse_path;
     V curr = to;

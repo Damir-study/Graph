@@ -3,7 +3,8 @@
 
 #include "../../include/Graph/DirectedGraph.hpp"
 
-#include <stdexcept>
+#include <expected>
+#include <string>
 
 template <typename V, typename W>
 DirectedGraph<V, W>::DirectedGraph()
@@ -68,9 +69,9 @@ bool DirectedGraph<V, W>::is_directed() const {
 }
 
 template <typename V, typename W>
-std::size_t DirectedGraph<V, W>::get_in_degree(const V& vertex) const {
+std::expected<std::size_t, std::string> DirectedGraph<V, W>::get_in_degree(const V& vertex) const {
     if (!this->contains_vertex(vertex)) {
-        throw std::invalid_argument("Вершина не найдена в графе");
+        return std::unexpected("Вершина не найдена в графе");
     }
     std::size_t count = 0;
     const mutable_array_sequence<V>& vertices = this->get_vertices();
@@ -86,9 +87,9 @@ std::size_t DirectedGraph<V, W>::get_in_degree(const V& vertex) const {
 }
 
 template <typename V, typename W>
-std::size_t DirectedGraph<V, W>::get_out_degree(const V& vertex) const {
+std::expected<std::size_t, std::string> DirectedGraph<V, W>::get_out_degree(const V& vertex) const {
     if (!this->contains_vertex(vertex)) {
-        throw std::invalid_argument("Вершина не найдена в графе");
+        return std::unexpected("Вершина не найдена в графе");
     }
     return static_cast<std::size_t>(this->adjacency.get(vertex).get_length());
 }

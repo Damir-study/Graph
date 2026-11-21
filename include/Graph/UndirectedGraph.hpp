@@ -1,6 +1,10 @@
 #ifndef UNDIRECTED_GRAPH_HPP
 #define UNDIRECTED_GRAPH_HPP
 
+#include <cstddef>
+#include <expected>
+#include <string>
+
 #include "Graph.hpp"
 #include "../../TreeStructures/include/Dictionary/BinaryTreeDictionaryStorage.hpp"
 #include "../../TreeStructures/include/BinaryTree/BalancedTree.hpp"
@@ -30,7 +34,7 @@ public:
     bool is_directed() const override;
 
     // Степень вершины
-    std::size_t get_degree(const V& vertex) const;
+    std::expected<std::size_t, std::string> get_degree(const V& vertex) const;
 
     // Анализ графа
     bool has_cycle() const override;

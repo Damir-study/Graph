@@ -1,6 +1,10 @@
 #ifndef DIRECTED_GRAPH_HPP
 #define DIRECTED_GRAPH_HPP
 
+#include <cstddef>
+#include <expected>
+#include <string>
+
 #include "Graph.hpp"
 #include "../../TreeStructures/include/Dictionary/BinaryTreeDictionaryStorage.hpp"
 #include "../../TreeStructures/include/BinaryTree/BalancedTree.hpp"
@@ -30,8 +34,8 @@ public:
     bool is_directed() const override;
 
     // Степени и соседи
-    std::size_t get_in_degree(const V& vertex) const;
-    std::size_t get_out_degree(const V& vertex) const;
+    std::expected<std::size_t, std::string> get_in_degree(const V& vertex) const;
+    std::expected<std::size_t, std::string> get_out_degree(const V& vertex) const;
 
     // Анализ графа
     bool has_cycle() const override;

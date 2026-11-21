@@ -2,6 +2,8 @@
 #define GRAPH_HPP
 
 #include <cstddef>
+#include <expected>
+#include <string>
 
 #include "../../TreeStructures/include/Dictionary/Dictionary.hpp"
 #include "../../Sequence/mutable_array_sequence.h"
@@ -43,10 +45,10 @@ public:
     virtual bool set_edge_weight(const V& from, const V& to, const W& weight) = 0;
 
     bool contains_edge(const V& from, const V& to) const;
-    const W& get_edge_weight(const V& from, const V& to) const;
+    std::expected<W, std::string> get_edge_weight(const V& from, const V& to) const;
 
     const mutable_array_sequence<V>& get_vertices() const;
-    const NeighborList& get_neighbors(const V& vertex) const;
+    std::expected<NeighborList, std::string> get_neighbors(const V& vertex) const;
 
     std::size_t get_vertex_count() const;
     std::size_t get_edge_count() const;
@@ -57,12 +59,12 @@ public:
     void clear();
 
     // Обходы. Результат — вершины в порядке посещения.
-    mutable_array_sequence<V> dfs(const V& start) const;
-    mutable_array_sequence<V> bfs(const V& start) const;
+    std::expected<mutable_array_sequence<V>, std::string> dfs(const V& start) const;
+    std::expected<mutable_array_sequence<V>, std::string> bfs(const V& start) const;
 
     // Достижимость и поиск пути.
     bool has_path(const V& from, const V& to) const;
-    mutable_array_sequence<V> find_path(const V& from, const V& to) const;
+    std::expected<mutable_array_sequence<V>, std::string> find_path(const V& from, const V& to) const;
 
     // Анализ структуры графа.
     virtual bool has_cycle() const = 0;
