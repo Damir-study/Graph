@@ -1,0 +1,9 @@
+.DS_Store
+*.o
+*.exe
+*.a
+*.dylib
+*.out
+*.pdf
+build/
+cmake-build-*/

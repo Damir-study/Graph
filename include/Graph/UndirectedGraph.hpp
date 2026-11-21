@@ -13,21 +13,32 @@ public:
     using typename Graph<V, W>::Storage;
 
     UndirectedGraph();
-    explicit UndirectedGraph(Storage* storage);
+    UndirectedGraph(Storage* storage);
+
+    UndirectedGraph(const UndirectedGraph& other) = default;
+    UndirectedGraph& operator=(const UndirectedGraph& other) = default;
+    UndirectedGraph(UndirectedGraph&& other) = default;
+    UndirectedGraph& operator=(UndirectedGraph&& other) = default;
+
     ~UndirectedGraph() override = default;
 
-    bool add_edge(
-        const V& from,
-        const V& to,
-        const W& weight
-    ) override;
-
-    bool remove_edge(
-        const V& from,
-        const V& to
-    ) override;
+    // Работа с рёбрами
+    bool add_edge(const V& from, const V& to, const W& weight) override;
+    bool remove_edge(const V& from, const V& to) override;
+    bool set_edge_weight(const V& from, const V& to, const W& weight) override;
 
     bool is_directed() const override;
+
+    // Степень вершины
+    std::size_t get_degree(const V& vertex) const;
+
+    // Анализ графа
+    bool has_cycle() const override;
+    bool is_connected() const;
+    bool is_tree() const;
+
+    // Построение порождённого подграфа
+    UndirectedGraph<V, W>* get_subgraph(const mutable_array_sequence<V>& vertices) const override;
 };
 
 #include "../../src/Graph/UndirectedGraph.tpp"

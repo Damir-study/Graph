@@ -6,9 +6,10 @@
 #include "../../TreeStructures/include/Dictionary/Dictionary.hpp"
 #include "../../Sequence/mutable_array_sequence.h"
 
+// V — тип вершины; W — тип веса ребра.
 template <typename V, typename W>
 class Graph {
-protected:
+public:
     struct Neighbor {
         V vertex;
         W weight;
@@ -16,52 +17,58 @@ protected:
 
     using NeighborList = mutable_array_sequence<Neighbor>;
     using Storage = IDictionaryStorage<V, NeighborList>;
-
+protected:
     Dictionary<V, NeighborList> adjacency;
     mutable_array_sequence<V> vertex_list;
     std::size_t edge_count = 0;
 
     Graph(Storage* storage);
 
+    Graph(const Graph& other);
+    Graph& operator=(const Graph& other);
+    Graph(Graph&& other);
+    Graph& operator=(Graph&& other);
+
 public:
     virtual ~Graph() = default;
 
-    // Вершины
+    // вершины
     bool add_vertex(const V& vertex);
     bool remove_vertex(const V& vertex);
     bool contains_vertex(const V& vertex) const;
 
-    // Рёбра
-    virtual bool add_edge(
-        const V& from,
-        const V& to,
-        const W& weight
-    ) = 0;
-
-    virtual bool remove_edge(
-        const V& from,
-        const V& to
-    ) = 0;
+    // ребра
+    virtual bool add_edge(const V& from, const V& to, const W& weight) = 0;
+    virtual bool remove_edge(const V& from, const V& to) = 0;
+    virtual bool set_edge_weight(const V& from, const V& to, const W& weight) = 0;
 
     bool contains_edge(const V& from, const V& to) const;
+    const W& get_edge_weight(const V& from, const V& to) const;
 
-    const W& get_edge_weight(
-        const V& from,
-        const V& to
-    ) const;
-
-    // Доступ к данным
     const mutable_array_sequence<V>& get_vertices() const;
+    const NeighborList& get_neighbors(const V& vertex) const;
 
-    // Информация о графе
     std::size_t get_vertex_count() const;
     std::size_t get_edge_count() const;
     bool is_empty() const;
-
     virtual bool is_directed() const = 0;
 
-    // Очистка
+    void clear_edges();
     void clear();
+
+    // Обходы. Результат — вершины в порядке посещения.
+    mutable_array_sequence<V> dfs(const V& start) const;
+    mutable_array_sequence<V> bfs(const V& start) const;
+
+    // Достижимость и поиск пути.
+    bool has_path(const V& from, const V& to) const;
+    mutable_array_sequence<V> find_path(const V& from, const V& to) const;
+
+    // Анализ структуры графа.
+    virtual bool has_cycle() const = 0;
+
+    // Порождённый подграф: выбранные вершины и все рёбра между ними.
+    virtual Graph<V, W>* get_subgraph(const mutable_array_sequence<V>& vertices) const = 0;
 };
 
 #include "../../src/Graph/Graph.tpp"
