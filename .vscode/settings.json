@@ -1,3 +1,5 @@
 {
-    "cmake.sourceDirectory": "/Users/Home1/prog/projects/C++/3_sem/3_lab/Sequence/googletest"
+    "cmake.sourceDirectory": "/Users/Home1/prog/projects/C++/3_sem/3_lab/Sequence/googletest",
+    "C_Cpp.default.cppStandard": "c++23",
+    "C_Cpp.default.compilerPath": "/usr/bin/clang++"
 }
