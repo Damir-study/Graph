@@ -151,6 +151,63 @@ bool DirectedGraph<V, W>::has_cycle() const {
 }
 
 template <typename V, typename W>
+std::expected<mutable_array_sequence<V>, std::string> DirectedGraph<V, W>::topological_sort() const {
+    if (this->has_cycle()) {
+        return std::unexpected("Граф содержит цикл, топологическая сортировка невозможна");
+    }
+
+    Dictionary<V, bool> visited(
+        new BinaryTreeDictionaryStorage<V, bool>(
+            new BalancedTree<DictionaryPair<V, bool>>()));
+
+    mutable_array_sequence<V> post_order;
+    const mutable_array_sequence<V>& vertices = this->get_vertices();
+
+    struct Frame {
+        V vertex;
+        int next_neighbor;
+    };
+
+    mutable_array_sequence<Frame> stack;
+
+    for (int i = 0; i < vertices.get_length(); ++i) {
+        const V& root = vertices[i];
+        if (visited.contains_key(root)) {
+            continue;
+        }
+
+        visited.add(root, true);
+        stack.append(Frame{root, 0});
+
+        while (stack.get_length() > 0) {
+            int top_idx = stack.get_length() - 1;
+            V u = stack[top_idx].vertex;
+            int next_idx = stack[top_idx].next_neighbor;
+            const NeighborList& neighbors = this->adjacency.get(u);
+
+            if (next_idx < neighbors.get_length()) {
+                stack[top_idx].next_neighbor++;
+                const V& next_vertex = neighbors[next_idx].vertex;
+                if (!visited.contains_key(next_vertex)) {
+                    visited.add(next_vertex, true);
+                    stack.append(Frame{next_vertex, 0});
+                }
+            } else {
+                post_order.append(u);
+                stack.pop();
+            }
+        }
+    }
+
+    mutable_array_sequence<V> result;
+    for (int i = post_order.get_length() - 1; i >= 0; --i) {
+        result.append(post_order[i]);
+    }
+
+    return result;
+}
+
+template <typename V, typename W>
 DirectedGraph<V, W>* DirectedGraph<V, W>::get_subgraph(const mutable_array_sequence<V>& vertices) const {
     DirectedGraph<V, W>* sub = new DirectedGraph<V, W>();
 

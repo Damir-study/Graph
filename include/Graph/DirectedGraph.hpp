@@ -39,6 +39,7 @@ public:
 
     // Анализ графа
     bool has_cycle() const override;
+    std::expected<mutable_array_sequence<V>, std::string> topological_sort() const;
 
     // Построение порождённого подграфа
     DirectedGraph<V, W>* get_subgraph(const mutable_array_sequence<V>& vertices) const override;
